@@ -29,7 +29,7 @@ jobs:
           
       - name: Run Pandoc
         run: |
-          pandoc -t html --pdf-engine=wkhtmltopdf --css=layouts/worksheet.css --output=output/result.pdf ${{ steps.files_list.outputs.files }}
+          pandoc -t html --pdf-engine=wkhtmltopdf --pdf-engine-opt=--enable-local-file-access --css=layouts/worksheet.css --output=output/result.pdf ${{ steps.files_list.outputs.files }}
           
       - name: Upload Artifacts
         uses: actions/upload-artifact@master
