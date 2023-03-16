@@ -1,0 +1,42 @@
+name: Convert MD to PDF
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  convert_via_pandoc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install WKHTMLTOPDF
+        run: |
+          sudo apt-get install xvfb libfontconfig wkhtmltopdf
+      
+      - name: Create File List
+        id: files_list
+        run: |
+          mkdir output
+          echo "::set-output name=files::$(printf '"%s" ' *.md)"
+          
+      - name: Run Pandoc
+        uses: docker://pandoc/core:2.9
+        with:
+          args: -- --output=output/result.pdf ${{ steps.files_list.outputs.files }}
+          
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: output
+          path: output
+      
+      - name: Commit
+        run: |
+          git add .
+          # Force the build to succeed, even if no files were changed
+          git commit -m 'Export to PDF' || true
+          git push	
