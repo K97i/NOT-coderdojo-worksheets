@@ -13,8 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Install WKHTMLTOPDF
+      - name: Install Dependencies
         run: |
+          # Install Pandoc
+          wget https://github.com/jgm/pandoc/releases/download/2.9.2.1/pandoc-2.9.2.1-1-amd64.deb
+          sudo dpkg -i pandoc-2.9.2.1-1-amd64.deb
+          # Install WKHTMLTOPDF
           sudo apt-get install xvfb libfontconfig wkhtmltopdf
       
       - name: Create File List
@@ -24,9 +28,8 @@ jobs:
           echo "::set-output name=files::$(printf '"%s" ' *.md)"
           
       - name: Run Pandoc
-        uses: docker://pandoc/core:2.9
-        with:
-          args: --pdf-engine=wkhtmltopdf --css=layouts/worksheet.css --output=output/result.pdf ${{ steps.files_list.outputs.files }}
+        run: |
+          pandoc -t html --pdf-engine=wkhtmltopdf --css=layouts/worksheet.css --output=output/result.pdf ${{ steps.files_list.outputs.files }}
           
       - name: Upload Artifacts
         uses: actions/upload-artifact@master
